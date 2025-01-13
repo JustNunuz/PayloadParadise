@@ -21,6 +21,9 @@ Welcome to **Payload Paradise**, a repository showcasing proof-of-concept script
 - To showcase real-world examples of what could go wrong if such vulnerabilities fall into the wrong hands.  
 - To stress the importance of handling trusted files with care, as even those from familiar sources can be harmful.  
 
+## System Information
+I ran this on Windows 11 with WhatsApp 2.2450.6.0 from Dec 2024 to Jan 2025, and the vulnerability was still working. For all tests requiring another machine (attacker), I used a basic install of Kali Linux, unless stated otherwise.
+
 ## Contents  
 - **Reverse Shells**: Demonstrating unauthorized remote access.  
 - **System Reconnaissance**: Gathering metadata and user information.  
