@@ -34,6 +34,19 @@ I ran this on Windows 11 with WhatsApp 2.2450.6.0 from Dec 2024 to Jan 2025, and
 - **System Interruption**: Shutting down the system or disrupting processes.
 - **Creative Payloads**: Unexpected scripts showcasing how trusted apps can execute malicious code.
 
+### Execution  
+
+The scripts in this repository are provided in two file formats: `.pyz` and `.pyzw`. Here's a brief explanation of the difference between `.py`, `.pyz`, and `.pyzw` formats:
+
+| File Format | Description                                                      | Behavior in WhatsApp                                                                                                     |
+| ----------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **`.py`**   | The standard Python script you may be familiar with.             | **Blocked** by WhatsApp. These files will not execute as intended due to built-in security mechanisms.                   |
+| **`.pyz`**  | A compressed Python archive.                                     | **Runs**, but opens a command prompt (CMD) window first, making it easier for the user to detect the script's execution. |
+| **`.pyzw`** | A further-obfuscated format combining compression and packaging. | **Runs** without any noticeable background activity, making it more stealthy and harder for users to detect.             |
+
+The repository only contains `.pyz` and `.pyzw` formats, each demonstrating different levels of detection and execution, providing insights into how scripts can bypass security measures and user awareness.
+
+
 ### Challenges
 
 I initially attempted to write an exploit for a keylogger that would not only open a reverse shell but also send keystrokes back to the attacker. However, this proved to be far more difficult than expected. Despite multiple attempts, the keylogger would successfully establish a reverse shell and even send heartbeat messages back to the attacker. But when it came to transmitting the actual keystrokes—such as login credentials—it simply refused to do so. After numerous iterations and debugging attempts, I couldn't pinpoint the exact reason for the failure. The keylogger should have worked in theory, but its execution was inconsistent, making it a challenging task to achieve the desired functionality.
