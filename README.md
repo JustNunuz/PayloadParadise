@@ -47,13 +47,15 @@ The scripts in this repository are provided in two file formats: `.pyz` and `.py
 The repository only contains `.pyz` and `.pyzw` formats, each demonstrating different levels of detection and execution, providing insights into how scripts can bypass security measures and user awareness.
 
 
-### Challenges
+### Interesting Observations
+
+I once had an idea to code Malware as the strongest POC for malicious usage.
 
 I initially attempted to write an exploit for a keylogger that would not only open a reverse shell but also send keystrokes back to the attacker. However, this proved to be far more difficult than expected. Despite multiple attempts, the keylogger would successfully establish a reverse shell and even send heartbeat messages back to the attacker. But when it came to transmitting the actual keystrokes—such as login credentials—it simply refused to do so. After numerous iterations and debugging attempts, I couldn't pinpoint the exact reason for the failure. The keylogger should have worked in theory, but its execution was inconsistent, making it a challenging task to achieve the desired functionality.
 
 ### Credits
 
-This project would not have been possible without the foundational work of the security researcher who discovered the [vulnerability](https://www.bleepingcomputer.com/news/security/whatsapp-for-windows-lets-python-php-scripts-execute-with-no-warning/). You can find their research and insights in the original [GitHub repository]([https://github.com/SaumyajeetDas/WhatsApp-Exploit]). Their efforts were pivotal in shedding light on this serious security issue, and I want to acknowledge their contribution to the field.
+This project would not have been possible without the foundational work of the security researcher who discovered the [vulnerability]([https://www.linkedin.com/in/saumyajeetdas/]). You can find their research and insights in the original [GitHub repository]([https://github.com/SaumyajeetDas/WhatsApp-Exploit]). Their efforts were pivotal in shedding light on this serious security issue, and I want to acknowledge their contribution to the field.
 
 ## Disclaimer
 
