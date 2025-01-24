@@ -80,7 +80,7 @@ My goal was to explore the worst-case scenario by simulating malware activity. T
 
 ### Credits
 
-This project would not have been possible without the foundational work of the security researcher who discovered the [vulnerability]([https://www.linkedin.com/in/saumyajeetdas/]). You can find their research and insights in the original [GitHub repository]([https://github.com/SaumyajeetDas/WhatsApp-Exploit]). Their efforts were pivotal in shedding light on this serious security issue, and I want to acknowledge their contribution to the field.
+This project would not have been possible without the foundational work of the security researcher who discovered the [vulnerability](https://www.linkedin.com/in/saumyajeetdas/). You can find their research and insights in the original [GitHub repository](https://github.com/SaumyajeetDas/WhatsApp-Exploit). Their efforts were pivotal in shedding light on this serious security issue, and I want to acknowledge their contribution to the field.
 
 ## Disclaimer
 
