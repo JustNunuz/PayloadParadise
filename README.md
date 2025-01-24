@@ -50,7 +50,6 @@ The repository only contains `.pyz` and `.pyzw` formats, each demonstrating diff
 
 My goal was to explore the worst-case scenario by simulating malware activity. To achieve this, I decided to create a keylogger and a data exfiltration tool using a reverse shell and keylogging functionality. Here’s a breakdown of my attempts and findings:
 
----
 
 #### Attempt 1: Keylogger
 **Short Description and Objective**:
