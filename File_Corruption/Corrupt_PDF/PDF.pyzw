@@ -1,0 +1,21 @@
+import os
+
+def corrupt_pdf(file_path, output_path):
+    with open(file_path, 'rb') as f:
+        content = f.read()
+
+    # Modify the content (e.g., change a byte)
+    modified_content = content[:100] + b'\x00' + content[101:]
+
+    with open(output_path, 'wb') as f:
+        f.write(modified_content)
+
+# Get the desktop path
+desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+
+# Define the input and output file paths
+input_file = os.path.join(desktop_path, 'test.pdf')
+output_file = os.path.join(desktop_path, 'corrupted_document.pdf')
+
+# Corrupt the PDF file
+corrupt_pdf(input_file, output_file)

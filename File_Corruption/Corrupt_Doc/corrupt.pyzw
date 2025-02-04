@@ -1,0 +1,30 @@
+import os
+import zipfile
+
+def corrupt_docx(file_path, output_path, num_bytes=50000):
+    """Corrupts a DOCX file by overwriting bytes in its XML content."""
+    with zipfile.ZipFile(file_path, 'r') as docx:
+        file_list = docx.namelist()
+
+        with zipfile.ZipFile(output_path, 'w') as corrupted_docx:
+            for file_name in file_list:
+                content = docx.read(file_name)
+
+                # Corrupt all XML files by overwriting multiple bytes
+                if file_name.endswith('.xml'):
+                    corrupt_section = b'\x00' * num_bytes  # Overwrite with null bytes
+                    modified_content = content[:100] + corrupt_section + content[100 + num_bytes:]
+                else:
+                    modified_content = content
+
+                corrupted_docx.writestr(file_name, modified_content)
+
+# Get desktop path
+desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+
+# Define input and output file paths
+input_file = os.path.join(desktop_path, 'test.docx')
+output_file = os.path.join(desktop_path, 'corrupted_document.docx')
+
+# Corrupt the DOCX file
+corrupt_docx(input_file, output_file)
