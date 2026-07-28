@@ -62,31 +62,43 @@ unlocked = False
 
 
 def block_keys_callback(nCode, wParam, lParam):
-    """Block Alt+Tab, Alt+F4, Win key, and Ctrl+Esc to prevent escape."""
+    """Block Alt+Tab, Alt+F4, Win key, Ctrl+Esc, etc. to prevent escape."""
     if nCode == HC_ACTION:
         kb = ctypes.cast(lParam, ctypes.POINTER(KBDLLHOOKSTRUCT)).contents
         vk = kb.vkCode
 
-        # Get modifier states
+        # Get modifier states (check if highest bit is set)
         alt_pressed = (user32.GetAsyncKeyState(0x12) & 0x8000) != 0
         ctrl_pressed = (user32.GetAsyncKeyState(0x11) & 0x8000) != 0
 
-        # Block Alt+Tab
-        if alt_pressed and vk == VK_TAB:
-            return 1
-        # Block Alt+F4
-        if alt_pressed and vk == VK_F4:
-            return 1
-        # Block Win key
+        # Block Win key (Left Win: 0x5B, Right Win: 0x5C)
         if vk in (VK_LWIN, VK_RWIN):
             return 1
-        # Block Ctrl+Esc (Start menu)
+        
+        # Block Alt+Tab (Tab: 0x09)
+        if alt_pressed and vk == VK_TAB:
+            return 1
+            
+        # Block Alt+F4 (F4: 0x73)
+        if alt_pressed and vk == VK_F4:
+            return 1
+            
+        # Block Ctrl+Esc (Start menu) (Esc: 0x1B)
         if ctrl_pressed and vk == VK_ESCAPE:
             return 1
+            
         # Block Alt+Esc
         if alt_pressed and vk == VK_ESCAPE:
             return 1
 
+        # Also block Ctrl+Shift+Esc (Task Manager)
+        shift_pressed = (user32.GetAsyncKeyState(0x10) & 0x8000) != 0
+        if ctrl_pressed and shift_pressed and vk == VK_ESCAPE:
+            return 1
+
+        # Block Ctrl+Alt+Del is not possible via WH_KEYBOARD_LL hook in modern Windows
+        # (It requires a custom GINA or credential provider, which is out of scope for a simple Python script).
+        
     return user32.CallNextHookEx(None, nCode, wParam, lParam)
 
 

@@ -34,10 +34,13 @@ def block_keys_callback(nCode, wParam, lParam):
         vk = kb.vkCode
         alt = (user32.GetAsyncKeyState(0x12) & 0x8000) != 0
         ctrl = (user32.GetAsyncKeyState(0x11) & 0x8000) != 0
-        if (alt and vk == 0x09) or (alt and vk == 0x73) or vk in (0x5B, 0x5C):
-            return 1
-        if (ctrl and vk == 0x1B) or (alt and vk == 0x1B):
-            return 1
+        shift = (user32.GetAsyncKeyState(0x10) & 0x8000) != 0
+        if vk in (0x5B, 0x5C): return 1 # Win keys
+        if alt and vk == 0x09: return 1 # Alt+Tab
+        if alt and vk == 0x73: return 1 # Alt+F4
+        if ctrl and vk == 0x1B: return 1 # Ctrl+Esc
+        if alt and vk == 0x1B: return 1 # Alt+Esc
+        if ctrl and shift and vk == 0x1B: return 1 # Ctrl+Shift+Esc
     return user32.CallNextHookEx(None, nCode, wParam, lParam)
 
 _block_callback = HOOKPROC(block_keys_callback)
