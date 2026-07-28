@@ -34,6 +34,3 @@ This script creates a **full-screen locker** that prevents access to the system 
 - **Callback Function**: Checks if the entered password is `"root"` when `Ctrl+C` is pressed.
 - **Loop**: Keeps the locker active until the correct password is entered.
 
-## Status: Needs Work!
-
-This means these scripts do not work a POCs of an exploit and I need to do more research into why
