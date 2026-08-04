@@ -14,7 +14,10 @@
 
 # Payload Paradise
 
-Welcome to **Payload Paradise**, a repository showcasing proof-of-concept scripts that demonstrate the dangers of unflagged script execution vulnerabilities. This project explores the implications of the WhatsApp for Windows [vulnerability](https://www.bleepingcomputer.com/news/security/whatsapp-for-windows-lets-python-php-scripts-execute-with-no-warning/) that allows Python and PHP scripts to execute without warning.
+WhatsApp for Windows has a security vulnerability that allows `.pyz` (Python ZIP application) files to execute automatically without warning when a user clicks "Open".
+
+### What does that mean you ask?
+If I send you a file and you click run, it will automatically run. So in one click you run code that can delete your files, restart your computer, or create a reverse connection to an attacker's machine so they can take over your computer.
 
 ## Objectives
 
@@ -81,4 +84,13 @@ The repository only contains `.pyz` and `.pyzw` formats, each demonstrating diff
 
 This project would not have been possible without the foundational work of the security researcher who discovered the [vulnerability](https://www.linkedin.com/in/saumyajeetdas/). You can find their research and insights in the original [GitHub repository](https://github.com/SaumyajeetDas/WhatsApp-Exploit). Their efforts were pivotal in shedding light on this serious security issue, and I want to acknowledge their contribution to the field.
 
+
+
+## Disclaimer
+
+This repository is for **educational purposes only**. Do not use these scripts maliciously. The purpose is to raise awareness and inspire robust security practices.
+
+## Stay Secure
+
+This project emphasizes that security starts with awareness. Even as power users, we must remember that trust can be exploited.
 
